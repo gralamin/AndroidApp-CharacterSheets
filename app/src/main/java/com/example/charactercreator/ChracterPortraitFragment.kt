@@ -2,15 +2,13 @@ package com.example.charactercreator
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.example.charactercreator.models.ALL_CHARACTERS
-import com.example.charactercreator.placeholder.PlaceholderContent
+import com.example.charactercreator.models.CharacterSummary
 
 /**
  * A fragment representing a list of Items.
@@ -32,6 +30,11 @@ class ChracterPortraitFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_item_list, container, false)
+        var characters = listOf<CharacterSummary>()
+        if (activity is CharacterSummaryDataInterface) {
+            val asInterface: CharacterSummaryDataInterface = activity as CharacterSummaryDataInterface
+            characters = asInterface.getModels()
+        }
 
         // Set the adapter
         if (view is RecyclerView) {
@@ -40,7 +43,7 @@ class ChracterPortraitFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> StaggeredGridLayoutManager(2, RecyclerView.VERTICAL)
                 }
-                adapter = MyChracterPortraitRecyclerViewAdapter(ALL_CHARACTERS)
+                adapter = MyChracterPortraitRecyclerViewAdapter(characters)
             }
         }
         return view

@@ -10,11 +10,17 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import com.example.charactercreator.databinding.ActivityMainBinding
+import com.example.charactercreator.db.DBHelper
+import com.example.charactercreator.db.TestDataCreator
+import com.example.charactercreator.db.contracts.SummaryDataConverter
+import com.example.charactercreator.models.CharacterSummary
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CharacterSummaryDataInterface {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+
+    private lateinit var dbHelper: DBHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +34,11 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+        dbHelper = DBHelper(this)
+        val db = dbHelper.writableDatabase
+        // TODO Don't ship this line
+        TestDataCreator.createTestData(db!!)
+
         binding.fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
@@ -38,6 +49,11 @@ class MainActivity : AppCompatActivity() {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
+    }
+
+    override fun onDestroy() {
+        dbHelper.close()
+        super.onDestroy()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -54,5 +70,9 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+    override fun getModels(): List<CharacterSummary> {
+        return SummaryDataConverter.readModels(dbHelper.readableDatabase)
     }
 }
